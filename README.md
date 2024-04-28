@@ -1,1 +1,1 @@
-# rsshub
+# RssHub Service in Terminus
