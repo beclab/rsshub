@@ -28,7 +28,9 @@
     "dotenv": "16.3.1",
     "reflect-metadata": "^0.1.13",
     "uuid": "^9.0.0",
-    "rsshub": "1.0.0-master.c68fba6"
+    "rsshub": "1.0.0-master.c68fba6",
+    "psl": "^1.9.0",
+    "route-recognizer": "^0.3.4"
     
   },
   "devDependencies": {
