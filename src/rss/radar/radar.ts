@@ -183,7 +183,7 @@ export function getPageRSSHub(data: { url: string; html: string; rules: any }) {
                         ),
                         //url: rsshubDomain + parsed,
                         url: 'rsshub:/' + parsed,
-                        path: parsed,
+                        //path: parsed,
                       });
                     } else {
                       /*result.push({
