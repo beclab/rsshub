@@ -1,9 +1,10 @@
 import { Controller, Get, Query, Logger, Post, Body } from '@nestjs/common';
-import { Result, returnSucceed } from '@bytetrade/core';
+import { Result, returnError, returnSucceed } from '@bytetrade/core';
 import { getWebsiteRSSHub, getPageRSSHub } from './radar/radar';
 import { defaultRules } from './radar/radar-rules';
 import { RSSService } from './rss.service';
 import { RuleQuery } from './entity/radar';
+import * as cheerio from 'cheerio';
 
 @Controller('/rss')
 export class RSSController {
@@ -24,21 +25,34 @@ export class RSSController {
       rules: defaultRules,
     });
     this.logger.debug('rss Hub web site len:', rsshubResult.length);
-    console.log(returnSucceed(rsshubResult));
     return returnSucceed(rsshubResult);
   }
 
-  @Post('/rsshub/page')
-  async checkRssHubInPage(@Body() query: RuleQuery): Promise<Result<any>> {
-    const url = query.url;
-    const html = query.html;
+  @Get('/rsshub/page')
+  async checkRssHubInPage(@Query('url') url: string): Promise<Result<any>> {
+    const response = await fetch(url);
+    if (!response.ok) {
+      this.logger.debug('check rss in web page response is not ok!!', url);
+      return returnError(404, 'Not found');
+    }
+    const html = await response.text();
     const rsshubResult = getPageRSSHub({
       url,
       html,
       rules: defaultRules,
     });
     this.logger.debug('rssHub  in page  len:', rsshubResult.length);
-    console.log(returnSucceed(rsshubResult));
-    return returnSucceed(rsshubResult);
+
+    const $ = cheerio.load(html);
+    const rssLinks = $(
+      'link[type="application/rss+xml"], link[type="application/atom+xml"],a[href*="feed"],a[href*="rss"]',
+    );
+    let rssUrls = rssLinks.map((_, link) => $(link).attr('href')).get();
+    rssUrls = Array.from(new Set(rssUrls));
+    this.logger.debug('rss urls  in page  len:', rssUrls.length);
+    return returnSucceed({
+      rsshub: rsshubResult,
+      rssuls: rssUrls,
+    });
   }
 }
