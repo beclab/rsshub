@@ -4,6 +4,7 @@ import { getWebsiteRSSHub, getPageRSSHub } from './radar/radar';
 import { defaultRules } from './radar/radar-rules';
 import { RSSService } from './rss.service';
 import { RuleQuery } from './entity/radar';
+import axios from 'axios';
 import * as cheerio from 'cheerio';
 
 @Controller('/rss')
@@ -30,12 +31,21 @@ export class RSSController {
 
   @Get('/rsshub/page')
   async checkRssHubInPage(@Query('url') url: string): Promise<Result<any>> {
-    const response = await fetch(url);
+    /*const response = await fetch(url);
     if (!response.ok) {
       this.logger.debug('check rss in web page response is not ok!!', url);
       return returnError(404, 'Not found');
+    }*/
+    let html: string;
+    try {
+      const response = await axios.get(url);
+      html = response.data;
+    } catch (error) {
+      this.logger.debug('check rss in web page response is not ok!!', url);
+      return returnError(404, 'Not found');
     }
-    const html = await response.text();
+
+    //const html = await response.text();
     const rsshubResult = getPageRSSHub({
       url,
       html,
