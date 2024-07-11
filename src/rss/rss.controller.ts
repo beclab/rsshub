@@ -41,7 +41,11 @@ export class RSSController {
       const response = await axios.get(url);
       html = response.data;
     } catch (error) {
-      this.logger.debug('check rss in web page response is not ok!!', url);
+      this.logger.debug(
+        'check rss in web page response is not ok!!',
+        url,
+        error,
+      );
       return returnError(404, 'Not found');
     }
 
