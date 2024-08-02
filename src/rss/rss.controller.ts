@@ -74,4 +74,31 @@ export class RSSController {
       rssuls: rssUrls,
     });
   }
+
+  @Post('/rsshub/pageUseBody')
+  async checkRssHubInPageUseBody(
+    @Body() query: RuleQuery,
+  ): Promise<Result<any>> {
+    const url = query.url;
+    const html = query.html;
+    this.logger.debug('start check rsshub in page', url);
+    const rsshubResult = getPageRSSHub({
+      url,
+      html,
+      rules: defaultRules,
+    });
+    this.logger.debug('rssHub  in page  len:', rsshubResult.length);
+
+    const $ = cheerio.load(html);
+    const rssLinks = $(
+      'link[type="application/rss+xml"], link[type="application/atom+xml"],a[href*="feed"],a[href*="rss"]',
+    );
+    let rssUrls = rssLinks.map((_, link) => $(link).attr('href')).get();
+    rssUrls = Array.from(new Set(rssUrls));
+    this.logger.debug('rss urls  in page  len:', rssUrls.length);
+    return returnSucceed({
+      rsshub: rsshubResult,
+      rssuls: rssUrls,
+    });
+  }
 }
